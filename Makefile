@@ -26,7 +26,7 @@ numbers.o : numbers.cpp
 	$(CXX) $(CXXFLAGS) -O0 numbers.cpp -c -o numbers.o
 
 third_party/cpu_features/build/libcpu_features.a :
-	cd third_party/cpu_features && rm -rf build && mkdir build && cd build && cmake .. && make
+	cd third_party/cpu_features && rm -rf build && mkdir build && cd build && cmake .. -DBUILD_TESTING=OFF && make
 
 cryptofuzz : $(OBJECT_FILES) third_party/cpu_features/build/libcpu_features.a
 	test $(LIBFUZZER_LINK)

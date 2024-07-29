@@ -1,4 +1,4 @@
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,17 +13,28 @@
 // limitations under the License.
 
 #include "cpuinfo_arm.h"
-#include "filesystem_for_testing.h"
-#include "hwcaps_for_testing.h"
 
+#include "filesystem_for_testing.h"
 #include "gtest/gtest.h"
+#include "hwcaps_for_testing.h"
 
 namespace cpu_features {
 namespace {
 
-void DisableHardwareCapabilities() { SetHardwareCapabilities(0, 0); }
+TEST(CpuinfoArmTest, ArmFeaturesEnum) {
+   const char *last_name = GetArmFeaturesEnumName(ARM_LAST_);
+   EXPECT_STREQ(last_name, "unknown_feature");
+   for (int i = static_cast<int>(ARM_SWP); i != static_cast<int>(ARM_LAST_); ++i) {
+      const auto feature = static_cast<ArmFeaturesEnum>(i);
+      const char *name = GetArmFeaturesEnumName(feature);
+      ASSERT_FALSE(name == nullptr);
+      EXPECT_STRNE(name, "");
+      EXPECT_STRNE(name, last_name);
+   }
+}
 
 TEST(CpuinfoArmTest, FromHardwareCap) {
+  ResetHwcaps();
   SetHardwareCapabilities(ARM_HWCAP_NEON, ARM_HWCAP2_AES | ARM_HWCAP2_CRC32);
   GetEmptyFilesystem();  // disabling /proc/cpuinfo
   const auto info = GetArmInfo();
@@ -43,10 +54,16 @@ TEST(CpuinfoArmTest, FromHardwareCap) {
   EXPECT_FALSE(info.features.pmull);
   EXPECT_FALSE(info.features.sha1);
   EXPECT_FALSE(info.features.sha2);
+
+  // check some random features with EnumValue():
+  EXPECT_TRUE(GetArmFeaturesEnumValue(&info.features, ARM_VFP));
+  EXPECT_FALSE(GetArmFeaturesEnumValue(&info.features, ARM_VFPV4));
+  // out of bound EnumValue() check
+  EXPECT_FALSE(GetArmFeaturesEnumValue(&info.features, (ArmFeaturesEnum)~0x0));
 }
 
 TEST(CpuinfoArmTest, ODroidFromCpuInfo) {
-  DisableHardwareCapabilities();
+  ResetHwcaps();
   auto& fs = GetEmptyFilesystem();
   fs.CreateFile("/proc/cpuinfo", R"(processor       : 0
 model name      : ARMv7 Processor rev 3 (v71)
@@ -95,7 +112,7 @@ CPU revision    : 3)");
 
 // Linux test-case
 TEST(CpuinfoArmTest, RaspberryPiZeroFromCpuInfo) {
-  DisableHardwareCapabilities();
+  ResetHwcaps();
   auto& fs = GetEmptyFilesystem();
   fs.CreateFile("/proc/cpuinfo", R"(processor       : 0
 model name      : ARMv6-compatible processor rev 7 (v6l)
@@ -147,7 +164,7 @@ Serial          : 000000006cd946f3)");
 }
 
 TEST(CpuinfoArmTest, MarvellArmadaFromCpuInfo) {
-  DisableHardwareCapabilities();
+  ResetHwcaps();
   auto& fs = GetEmptyFilesystem();
   fs.CreateFile("/proc/cpuinfo", R"(processor       : 0
 model name      : ARMv7 Processor rev 1 (v7l)
@@ -211,7 +228,7 @@ Serial          : 0000000000000000)");
 // Android test-case
 // http://code.google.com/p/android/issues/detail?id=10812
 TEST(CpuinfoArmTest, InvalidArmv7) {
-  DisableHardwareCapabilities();
+  ResetHwcaps();
   auto& fs = GetEmptyFilesystem();
   fs.CreateFile("/proc/cpuinfo",
                 R"(Processor       : ARMv6-compatible processor rev 6 (v6l)
@@ -261,6 +278,7 @@ Serial          : 33323613546d00ec )");
 // Android test-case
 // https://crbug.com/341598.
 TEST(CpuinfoArmTest, InvalidNeon) {
+  ResetHwcaps();
   auto& fs = GetEmptyFilesystem();
   fs.CreateFile("/proc/cpuinfo",
                 R"(Processor: ARMv7 Processory rev 0 (v71)
@@ -288,7 +306,7 @@ Serial: 00001e030000354e)");
 // The Nexus 4 (Qualcomm Krait) kernel configuration forgets to report IDIV
 // support.
 TEST(CpuinfoArmTest, Nexus4_0x510006f2) {
-  DisableHardwareCapabilities();
+  ResetHwcaps();
   auto& fs = GetEmptyFilesystem();
   fs.CreateFile("/proc/cpuinfo",
                 R"(CPU implementer	: 0x51
@@ -306,7 +324,7 @@ CPU revision	: 2)");
 // The Nexus 4 (Qualcomm Krait) kernel configuration forgets to report IDIV
 // support.
 TEST(CpuinfoArmTest, Nexus4_0x510006f3) {
-  DisableHardwareCapabilities();
+  ResetHwcaps();
   auto& fs = GetEmptyFilesystem();
   fs.CreateFile("/proc/cpuinfo",
                 R"(CPU implementer	: 0x51
@@ -321,11 +339,29 @@ CPU revision	: 3)");
   EXPECT_EQ(GetArmCpuId(&info), 0x510006f3);
 }
 
+// The 2013 Nexus 7 (Qualcomm Krait) kernel configuration forgets to report IDIV
+// support.
+TEST(CpuinfoArmTest, Nexus7_2013_0x511006f0) {
+  ResetHwcaps();
+  auto& fs = GetEmptyFilesystem();
+  fs.CreateFile("/proc/cpuinfo",
+                R"(CPU implementer  : 0x51
+CPU architecture: 7
+CPU variant : 0x1
+CPU part  : 0x06f
+CPU revision  : 0)");
+  const auto info = GetArmInfo();
+  EXPECT_TRUE(info.features.idiva);
+  EXPECT_TRUE(info.features.idivt);
+
+  EXPECT_EQ(GetArmCpuId(&info), 0x511006f0);
+}
+
 // The emulator-specific Android 4.2 kernel fails to report support for the
 // 32-bit ARM IDIV instruction. Technically, this is a feature of the virtual
 // CPU implemented by the emulator.
 TEST(CpuinfoArmTest, EmulatorSpecificIdiv) {
-  DisableHardwareCapabilities();
+  ResetHwcaps();
   auto& fs = GetEmptyFilesystem();
   fs.CreateFile("/proc/cpuinfo",
                 R"(Processor	: ARMv7 Processor rev 0 (v7l)
