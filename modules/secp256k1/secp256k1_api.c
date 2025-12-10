@@ -231,6 +231,15 @@ void cryptofuzz_secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a) {
     secp256k1_ge_set_gej(r, a);
 }
 
-int cryptofuzz_secp256k1_eckey_pubkey_serialize(secp256k1_ge *elem, unsigned char *pub, size_t *size, int compressed) {
-    return secp256k1_eckey_pubkey_serialize(elem, pub, size, compressed);
+int cryptofuzz_secp256k1_eckey_pubkey_serialize65(secp256k1_ge *elem, unsigned char *pub) {
+#if \
+        !defined(SECP256K1_COMMIT_642cd062bdd2d28a8a84d4cb6dedbfe435ee5869) && \
+        !defined(SECP256K1_COMMIT_c663397f46152e96c548ba392858c730e132dd7a) && \
+        !defined(SECP256K1_COMMIT_cb32940df3e20ccdcbee7eaf5cda93c18a92fb3e) && \
+        !defined(SECP255K1_COMMIT_9d560f992db26612ce2630b194aef5f44d63a530)
+    size_t size;  /* Should always be set to 65 below but we don't check here. */
+    return ret = secp256k1_eckey_pubkey_serialize(elem, pub, &size, /*compressed=*/0);
+#else
+    return secp256k1_eckey_pubkey_serialize65(elem, pub);
+#endif
 }

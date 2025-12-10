@@ -74,4 +74,4 @@ void cryptofuzz_secp256k1_gej_double_var(void *r, const void *a, void *rzr);
 void cryptofuzz_secp256k1_ecmult(void *r, const void* a, const void* na, const void *ng);
 #endif
 void cryptofuzz_secp256k1_ge_set_gej(void *r, void *a);
-int cryptofuzz_secp256k1_eckey_pubkey_serialize(void *elem, unsigned char *pub, size_t *size, int compressed);
+int cryptofuzz_secp256k1_eckey_pubkey_serialize65(void *elem, unsigned char *pub);

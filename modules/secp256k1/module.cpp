@@ -1081,10 +1081,9 @@ std::optional<component::ECC_Point> secp256k1::OpECC_Point_Add(operation::ECC_Po
 
     {
         std::vector<uint8_t> point_bytes(65);
-        size_t point_bytes_size = point_bytes.size();
         CF_CHECK_EQ(
                 secp256k1_detail::CheckRet(
-                    cryptofuzz_secp256k1_eckey_pubkey_serialize(res_ge, point_bytes.data(), &point_bytes_size, 0)
+                    cryptofuzz_secp256k1_eckey_pubkey_serialize65(res_ge, point_bytes.data())
                     ), 1);
 
         {
@@ -1155,9 +1154,8 @@ std::optional<component::ECC_Point> secp256k1::OpECC_Point_Mul(operation::ECC_Po
 
     {
         std::vector<uint8_t> point_bytes(65);
-        size_t point_bytes_size = point_bytes.size();
         {
-            const bool ok = cryptofuzz_secp256k1_eckey_pubkey_serialize(res_ge, point_bytes.data(), &point_bytes_size, 0) == 1;
+            const bool ok = cryptofuzz_secp256k1_eckey_pubkey_serialize65(res_ge, point_bytes.data()) == 1;
             if ( cryptofuzz_secp256k1_scalar_is_zero(b) ) {
                 CF_ASSERT(ok == false, "Point multiplication by 0 does not yield point at infinity");
                 goto end;
@@ -1224,11 +1222,9 @@ std::optional<component::ECC_Point> secp256k1::OpECC_Point_Neg(operation::ECC_Po
 
     {
         std::vector<uint8_t> point_bytes(65);
-        size_t point_bytes_size = point_bytes.size();
-
         {
             const bool ok = secp256k1_detail::CheckRet(
-                    cryptofuzz_secp256k1_eckey_pubkey_serialize(res_ge, point_bytes.data(), &point_bytes_size, 0)
+                    cryptofuzz_secp256k1_eckey_pubkey_serialize65(res_ge, point_bytes.data())
                     ) == 1;
             CF_ASSERT(ok, "Negation of valid point yields invalid point");
         }
@@ -1307,10 +1303,9 @@ std::optional<component::ECC_Point> secp256k1::OpECC_Point_Dbl(operation::ECC_Po
 
     {
         std::vector<uint8_t> point_bytes(65);
-        size_t point_bytes_size = point_bytes.size();
         CF_CHECK_EQ(
                 secp256k1_detail::CheckRet(
-                    cryptofuzz_secp256k1_eckey_pubkey_serialize(res_ge, point_bytes.data(), &point_bytes_size, 0)
+                    cryptofuzz_secp256k1_eckey_pubkey_serialize65(res_ge, point_bytes.data())
                     ), 1);
 
         {
