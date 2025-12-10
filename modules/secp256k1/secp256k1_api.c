@@ -4,9 +4,7 @@
 #include <src/field_impl.h>
 #include <src/ecmult_impl.h>
 #include <src/eckey_impl.h>
-#if !defined(SECP255K1_COMMIT_9d560f992db26612ce2630b194aef5f44d63a530)
 #include <src/scratch_impl.h>
-#endif
 #if defined(__i386__) || defined(__arm__)
 #include <src/int128_struct.h>
 #else
@@ -61,15 +59,9 @@ void cryptofuzz_secp256k1_scalar_inverse_var(secp256k1_scalar *r, const secp256k
     secp256k1_scalar_inverse_var(r, x);
 }
 
-#if \
-        !defined(SECP256K1_COMMIT_642cd062bdd2d28a8a84d4cb6dedbfe435ee5869) && \
-        !defined(SECP256K1_COMMIT_c663397f46152e96c548ba392858c730e132dd7a) && \
-        !defined(SECP256K1_COMMIT_cb32940df3e20ccdcbee7eaf5cda93c18a92fb3e) && \
-        !defined(SECP255K1_COMMIT_9d560f992db26612ce2630b194aef5f44d63a530)
 void cryptofuzz_secp256k1_scalar_cmov(secp256k1_scalar *r, const secp256k1_scalar *a, int flag) {
     secp256k1_scalar_cmov(r, a, flag);
 }
-#endif
 
 unsigned int cryptofuzz_secp256k1_scalar_get_bits_limb32(const void *a, unsigned int offset, unsigned int count) {
     return secp256k1_scalar_get_bits_limb32(a, offset, count);
@@ -203,34 +195,22 @@ void cryptofuzz_secp256k1_gej_neg(secp256k1_gej *r, const secp256k1_gej *a) {
     secp256k1_gej_neg(r, a);
 }
 
-#if \
-        !defined(SECP256K1_COMMIT_642cd062bdd2d28a8a84d4cb6dedbfe435ee5869) && \
-        !defined(SECP256K1_COMMIT_c663397f46152e96c548ba392858c730e132dd7a) && \
-        !defined(SECP256K1_COMMIT_cb32940df3e20ccdcbee7eaf5cda93c18a92fb3e) && \
-        !defined(SECP255K1_COMMIT_9d560f992db26612ce2630b194aef5f44d63a530)
 void cryptofuzz_secp256k1_gej_double(void *r, const void *a) {
     secp256k1_gej_double(r, a);
 }
-#endif
 
 void cryptofuzz_secp256k1_gej_double_var(void *r, const void *a, void *rzr) {
     secp256k1_gej_double_var(r, a, rzr);
 }
 
-#if \
-        !defined(SECP256K1_COMMIT_642cd062bdd2d28a8a84d4cb6dedbfe435ee5869) && \
-        !defined(SECP256K1_COMMIT_c663397f46152e96c548ba392858c730e132dd7a) && \
-        !defined(SECP256K1_COMMIT_cb32940df3e20ccdcbee7eaf5cda93c18a92fb3e) && \
-        !defined(SECP255K1_COMMIT_9d560f992db26612ce2630b194aef5f44d63a530)
 void cryptofuzz_secp256k1_ecmult(secp256k1_gej *r, const secp256k1_gej *a, const secp256k1_scalar *na, const secp256k1_scalar *ng) {
     secp256k1_ecmult(r, a, na, ng);
 }
-#endif
 
 void cryptofuzz_secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a) {
     secp256k1_ge_set_gej(r, a);
 }
 
-int cryptofuzz_secp256k1_eckey_pubkey_serialize(secp256k1_ge *elem, unsigned char *pub, size_t *size, int compressed) {
-    return secp256k1_eckey_pubkey_serialize(elem, pub, size, compressed);
+void cryptofuzz_secp256k1_eckey_pubkey_serialize65(secp256k1_ge *elem, unsigned char *pub) {
+    secp256k1_eckey_pubkey_serialize65(elem, pub);
 }
