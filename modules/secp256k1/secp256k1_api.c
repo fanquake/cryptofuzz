@@ -231,6 +231,6 @@ void cryptofuzz_secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a) {
     secp256k1_ge_set_gej(r, a);
 }
 
-int cryptofuzz_secp256k1_eckey_pubkey_serialize(secp256k1_ge *elem, unsigned char *pub, size_t *size, int compressed) {
-    return secp256k1_eckey_pubkey_serialize(elem, pub, size, compressed);
+int cryptofuzz_secp256k1_eckey_pubkey_serialize65(secp256k1_ge *elem, unsigned char *pub) {
+    return secp256k1_eckey_pubkey_serialize65(elem, pub);
 }
